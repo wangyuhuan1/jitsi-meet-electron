@@ -15,7 +15,8 @@ import { conferenceEnded, conferenceJoined } from '../actions';
 import JitsiMeetExternalAPI from '../external_api';
 import { LoadingIndicator, Wrapper } from '../styled';
 
-const ENABLE_REMOTE_CONTROL = false;
+const ENABLE_REMOTE_CONTROL = false; 
+//enable_remote_control
 
 type Props = {
 
@@ -122,6 +123,8 @@ class Conference extends Component<Props, State> {
      */
     componentDidMount() {
         const room = this.props.location.state.room;
+        //123
+        console.log(this.props,config,'11111')
         const serverTimeout = this.props._serverTimeout || config.defaultServerTimeout;
         const serverURL = this.props.location.state.serverURL
             || this.props._serverURL
@@ -201,9 +204,30 @@ class Conference extends Component<Props, State> {
      */
     _loadConference() {
         const url = new URL(this._conference.room, this._conference.serverURL);
+        console.log(url,this._conference,this.props,'url')
+        //url
+        // {
+        //     hash: ""
+        //     host: "meet.jit.si"
+        //     hostname: "meet.jit.si"
+        //     href: "https://meet.jit.si/123"
+        //     origin: "https://meet.jit.si"
+        //     password: ""
+        //     pathname: "/123"
+        //     port: ""
+        //     protocol: "https:"
+        //     search: ""
+        //     searchParams: URLSearchParams {}
+        //     username: ""
+        // }
+        //this._conference
+        //{room: "123", serverURL: "https://meet.jit.si"}
         const roomName = url.pathname.split('/').pop();
+        //roomName = 123
         const host = this._conference.serverURL.replace(/https?:\/\//, '');
+        // host = meet.jit.si
         const searchParameters = Object.fromEntries(url.searchParams);
+        //Object.formEntries()方法将键值对列表转换为对象
         const locale = { lng: i18n.language };
         const urlParameters = {
             ...searchParameters,
@@ -217,9 +241,13 @@ class Conference extends Component<Props, State> {
 
         const options = {
             configOverwrite,
+            //（可选）带有config.js中定义的选项的JS对象
             onload: this._onIframeLoad,
+            //iframe onload事件的（可选）处理程序
             parentNode: this._ref.current,
+            //（可选）HTML DOM元素，将iframe作为子元素添加到其中。
             roomName
+            //（可选）要加入的会议室的名称
         };
 
         this._api = new JitsiMeetExternalAPI(host, {
@@ -229,9 +257,11 @@ class Conference extends Component<Props, State> {
 
 
         this._api.on('suspendDetected', this._onVideoConferenceEnded);
+        //暂停检测
         this._api.on('readyToClose', this._onVideoConferenceEnded);
         this._api.on('videoConferenceJoined',
             (conferenceInfo: Object) => {
+                console.log(conferenceInfo,'videoConferenceJoined')
                 this.props.dispatch(conferenceJoined(this._conference));
                 this._onVideoConferenceJoined(conferenceInfo);
             }
