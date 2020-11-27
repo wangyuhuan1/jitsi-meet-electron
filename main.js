@@ -4,7 +4,8 @@ const {
     BrowserWindow,
     Menu,
     app,
-    ipcMain
+    ipcMain,
+    session
 } = require('electron');
 const contextMenu = require('electron-context-menu');
 const debug = require('electron-debug');
@@ -25,7 +26,8 @@ const { openExternalLink } = require('./app/features/utils/openExternalLink');
 const pkgJson = require('./package.json');
 
 const showDevTools = Boolean(process.env.SHOW_DEV_TOOLS) || (process.argv.indexOf('--show-dev-tools') > -1);
-
+const Store = require('electron-store')
+const store = new Store();
 // We need this because of https://github.com/electron/electron/issues/18214
 app.commandLine.appendSwitch('disable-site-isolation-trials');
 
@@ -219,6 +221,23 @@ function createJitsiMeetWindow() {
         mainWindow.show();
     });
 
+    // var cookie = ''
+    var filter = {
+        urls: ['https://meet.bjnsc.usingnet.com/*']
+    }
+    var loginFilter = {
+        urls: ['https://meet.bjnsc.usingnet.com/api/auth/login'] 
+    }
+    session.defaultSession.webRequest.onBeforeSendHeaders(filter, (d, c) => {
+        let cookie = store.get('cookie')
+        d.requestHeaders['Cookie'] = cookie[0]
+        c({requestHeaders: d.requestHeaders})
+    })
+    session.defaultSession.webRequest.onHeadersReceived(loginFilter, (d, c) => {
+        cookie = d['responseHeaders']['Set-Cookie'] || ''
+        store.set('cookie',cookie)
+        c({})
+    })
     /**
      * When someone tries to enter something like jitsi-meet://test
      *  while app is closed

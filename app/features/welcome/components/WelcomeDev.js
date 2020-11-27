@@ -1,7 +1,7 @@
 
 import React, { Component } from 'react';
 // import Spinner from '@atlaskit/spinner';
-import type { Dispatch } from 'redux';
+// import type { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
 
@@ -10,7 +10,7 @@ import config from '../../config';
 import { getSetting, setEmail, setName } from '../../settings';
 import JitsiMeetExternalAPI from '../external_api';
 import { LoadingIndicator, Wrapper } from '../styled';
-
+const ENABLE_REMOTE_CONTROL = false; 
 
 class Welcome extends Component<Props, State> {
     /**
@@ -40,10 +40,28 @@ class Welcome extends Component<Props, State> {
             ...options
         });
         console.log(this._api,'11')
+        // this._api.getCurrentDevices().then(devices => {
+        //     console.log(devices,'devices')
+        // })
         //开始/停止屏幕共享。不需要参数。
         // this._api.executeCommand('toggleShareScreen');
         //通过数据通道将文本消息发送给另一个参与者。
         // this._api.executeCommand('sendEndpointTextMessage', 'receiverParticipantId', 'text');
+        const { 
+            RemoteControl,
+            setupScreenSharingRender,
+            initPopupsConfigurationRender,
+        } = window.jitsiNodeAPI.jitsiMeetElectronUtils;
+
+        initPopupsConfigurationRender(this._api);
+
+        const iframe = this._api.getIFrame();
+
+        setupScreenSharingRender(this._api);
+
+        if (ENABLE_REMOTE_CONTROL) {
+            new RemoteControl(iframe); // eslint-disable-line no-new
+        }
     }
     render() {
         return (
